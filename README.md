@@ -1,14 +1,15 @@
-# glamor
+# Glamor
 
 [![Join the chat at https://gitter.im/glamor-css/Lobby](https://badges.gitter.im/glamor-css/Lobby.svg)](https://gitter.im/glamor-css/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 ![build status](https://travis-ci.org/threepointone/glamor.svg)
 
 css in your javascript
 
+## Usage
+---
+
 `npm install glamor --save`
 
-usage
 ```jsx
 import { css } from 'glamor'
 
@@ -51,13 +52,13 @@ let bolder = css({
 
 ```
 
-motivation
+Motivation
 ---
 
 This expands on ideas from @vjeux's [2014 css-in-js talk](https://speakerdeck.com/vjeux/react-css-in-js).
 We introduce an api to annotate arbitrary dom nodes with style definitions ("rules") for, um, the greater good.
 
-features
+Features
 ---
 
 - fast / efficient, with a fluent api
@@ -67,6 +68,10 @@ features
 - `@media` queries
 - `@supports` statements
 - `@font-face` / `@keyframes`
+- uses 'real' stylesheets, so you can use all css features.
+- rules can be used as data-attributes or classNames.
+- simulate pseudo-classes with the `simulate` helper. very useful, especially when combined when hot-loading and/or editing directly in devtools.
+- really fast, by way of deduping rules, and using [insertRule](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule) in production.
 - escape hatches for parent / child / contextual selectors
 - dev helper to simulate pseudo classes like `:hover`, etc
 - server side / static rendering
@@ -76,8 +81,9 @@ features
 
 (thanks to [BrowserStack](https://www.browserstack.com/) for providing the infrastructure that allows us to run our build in real browsers.)
 
-docs
+User Guide
 ---
+
 - [api documentation](https://github.com/threepointone/glamor/blob/master/docs/api.md)
 - [howto](https://github.com/threepointone/glamor/blob/master/docs/howto.md) - a comparison of css techniques in glamor
 - [plugins](https://github.com/threepointone/glamor/blob/master/docs/plugins.md)
@@ -85,7 +91,7 @@ docs
 - [performance tips](https://github.com/threepointone/glamor/blob/master/docs/performance.md)
 - [what happens when I call css(...rules)?](https://github.com/threepointone/glamor/blob/master/docs/implementation.md)
 
-extras
+Extras
 ---
 
 - `glamor/reset` - include a css reset
@@ -98,7 +104,7 @@ extras
 - [`glamor/styled`](https://github.com/threepointone/glamor/blob/master/docs/styled.md) - an experimental port of [styled-components](https://styled-components.com/)
 
 
-speedy mode
+Speedy mode
 ---
 
 there are two methods by which the library adds styles to the document -
@@ -107,26 +113,14 @@ there are two methods by which the library adds styles to the document -
 
 as a compromise, we enable the former 'speedy' mode `NODE_ENV=production`, and disable it otherwise. You can manually toggle this with the `speedy()` function.
 
-characteristics
----
-
-while glamor shares most common attributes of other inline style / css-in-js systems,
-here are some key differences -
-
-- uses 'real' stylesheets, so you can use all css features.
-- rules can be used as data-attributes or classNames.
-- simulate pseudo-classes with the `simulate` helper. very useful, especially when combined when hot-loading and/or editing directly in devtools.
-- really fast, by way of deduping rules, and using [insertRule](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule) in production.
-
-
-todo
+Todo
 ---
 
 - redo all the docs
 - [planned enhancements](https://github.com/threepointone/glamor/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
 - notes on composition
 
-profit, profit
+Profit, profit
 ---
 
 I get it
