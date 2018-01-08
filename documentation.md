@@ -1,39 +1,29 @@
 <!-- TOC -->
+#Glamor
+---
 
+# Table of Contents
 - [Api](#api)
-  - [css(...rules)](#cssrules)
-  - [css.global(selector, style) / css.insert(css)](#cssglobalselector-style--cssinsertcss)
-  - [css.fontFace(font)](#cssfontfacefont)
-  - [css.keyframes(timeline)](#csskeyframestimeline)
-  - [simulate(...pseudoclasses)](#simulatepseudoclasses)
-  - [speedy(true/false)](#speedytruefalse)
+  - [css](#css)
+  - [css.global | css.insert](#cssglobal--cssinsert)
+  - [css.fontFace](#cssfontface)
+  - [css.keyframes](#csskeyframes)
+  - [simulate](#simulate)
+  - [speedy](#speedy)
   - [flush()](#flush)
-- [Aphrodite shim](#aphrodite-shim)
-- [Composing / Modularity](#composing--modularity)
-  - [Conditional styles](#conditional-styles)
-- [Glamor createElement](#glamor-createelement)
-  - [Usage](#usage)
-  - [Integration with typescript](#integration-with-typescript)
-- [CSS as values](#css-as-values)
-- [Use real css [experimental, buggy]](#use-real-css-experimental-buggy)
-  - [Syntax highlighting](#syntax-highlighting)
-  - [Linting](#linting)
-  - [babel plugin](#babel-plugin)
-  - [Caveat](#caveat)
-  - [Styled-components](#styled-components)
-  - [Todo](#todo)
 - [Helpers](#helpers)
   - [style](#style)
-  - [<pseudo>](#pseudo)
-  - [select / $](#select--)
+  - [pseudo](#pseudo)
+  - [select | $](#select--)
   - [parent](#parent)
-  - [compose / merge](#compose--merge)
+  - [compose | merge](#compose--merge)
   - [media](#media)
 - [Moving from css to glamor](#moving-from-css-to-glamor)
   - [Apply a style to an element](#apply-a-style-to-an-element)
   - [Pseudoclasses](#pseudoclasses)
   - [Multiple styles to an element](#multiple-styles-to-an-element)
   - [Child selectors](#child-selectors)
+  - [parent selectors](#parent-selectors)
   - [Siblings](#siblings)
   - [Media queries](#media-queries)
   - [Global css rule](#global-css-rule)
@@ -42,8 +32,15 @@
   - [Animations](#animations)
   - [css reset / normalize](#css-reset--normalize)
   - [Combined selectors](#combined-selectors)
+- [Aphrodite shim](#aphrodite-shim)
+- [Composing / Modularity](#composing--modularity)
+- [Conditional styles](#conditional-styles)
+- [Glamor createElement](#glamor-createelement)
+  - [Usage](#usage)
+  - [Integration with typescript](#integration-with-typescript)
+- [CSS as values](#css-as-values)
+- [Use real css [experimental, buggy]](#use-real-css-experimental-buggy)
 - [What happens when I call css(...rules)?](#what-happens-when-i-call-cssrules)
-  - [Further possible enhancements](#further-possible-enhancements)
 - [jsxstyle shim](#jsxstyle-shim)
 - [Performance considerations](#performance-considerations)
 - [Plugin system](#plugin-system)
@@ -53,12 +50,6 @@
 - [StyleSheet](#stylesheet)
 - [Theme](#theme)
 - [multi-index caches with WeakMaps](#multi-index-caches-with-weakmaps)
-  - [a quick summary of caching in javascript](#a-quick-summary-of-caching-in-javascript)
-  - [So, what does a cache built with a WeakMap look like?](#so-what-does-a-cache-built-with-a-weakmap-look-like)
-  - [So, how can we use it with glamor?](#so-how-can-we-use-it-with-glamor)
-  - [What about multiple arguments?](#what-about-multiple-arguments)
-  - [This sounds great! Any caveats?](#this-sounds-great-any-caveats)
-  - [About that tweet...](#about-that-tweet)
 - [Why I like glamor](#why-i-like-glamor)
 
 <!-- /TOC -->
@@ -66,8 +57,7 @@
 ## Api
 ---
 
-### css(...rules)
----
+### css
 
 In glamor, css rules are treated as values. The `css` function lets you define these values. 
 
@@ -149,7 +139,7 @@ is equivalent to
 ---
 
 
-###  css.global(selector, style) / css.insert(css)
+###  css.global | css.insert
 
 append a raw css rule at most once to the stylesheet. the ultimate escape hatch.
 
@@ -171,7 +161,7 @@ css.insert('html, body { padding: 0 } strong{ padding: 10p }')
 ```
 
 
-### css.fontFace(font)
+### css.fontFace
 
 loads the given font-face at most once into the document, returns the font family name
 
@@ -193,7 +183,7 @@ for anything more complicated, use something like [typography.js](https://kyleam
 
 ---
 
-### css.keyframes(timeline)
+### css.keyframes
 
 adds animation keyframes into the document, with an optional name.
 
@@ -218,7 +208,7 @@ use sparingly! for granular control, use javascript and pencil and paper.
 ---
 
 
-### simulate(...pseudoclasses)
+### simulate
 
 ![hover](http://i.imgur.com/mW7J8kg.gif)
 
@@ -227,7 +217,7 @@ in development, lets you trigger any pseudoclass on an element
 ---
 
 
-### speedy(true/false)
+### speedy
 
 toggle speedy mode. By default, this is off when `NODE_ENV` is `development`, and on when `production`.
 
@@ -235,6 +225,604 @@ toggle speedy mode. By default, this is off when `NODE_ENV` is `development`, an
 ### flush()
 
 TO FILL
+
+## Helpers
+---
+
+### style 
+
+`style(props)`
+
+Defines a `rule` with the given key-value pairs. returns an object (of shape `{'data-css-<id>': ''}`),
+to be added to an element's attributes. This is *not* the same as element's `style`,
+and doesn't interfere with the element's `className` / `class`
+
+```jsx
+<div {...style({ backgroundColor: '#ccc', borderRadius: 10 })}>
+  <a {...style({ label: 'blueText', color: 'blue' })} href='github.com'>
+    click me
+  </a>
+</div>
+```
+
+---
+
+### pseudo
+
+`<pseudo>(props)`
+
+where `<pseudo>` is one of :
+```
+active      any           checked     _default    disabled    empty
+enabled     first         firstChild  firstOfType fullscreen  focus
+hover       indeterminate inRange     invalid     lastChild   lastOfType
+left        link          onlyChild   onlyOfType  optional    outOfRange
+readOnly    readWrite     required    right root  scope       target
+valid       visited
+```
+
+defines a `rule` for the given pseudoclass selector
+
+```jsx
+<div {...hover({ backgroundColor: '#ccc', display: 'block'})}>
+  <input
+    {...style({ color: 'gray', fontSize: 12 })}
+    {...focus({ color: 'black' })}
+    {...hover({ fontSize: 16 })} />
+</div>
+```
+
+---
+
+`<pseudo>(param, props)`
+
+where `<pseudo>` is one of :
+```
+dir  lang  not  nthChild  nthLastChild  nthLastOfType  nthOfType
+```
+
+like the above, but parameterized with a number / string
+
+```jsx
+dir('ltr', props), dir('rtl', props)
+lang('en', props), lang('fr', props), lang('hi', props) /* etc... */
+not(/* selector */, props)
+nthChild(2, props), nthChild('3n-1', props), nthChild('even', props) /* etc... */
+nthLastChild(/* expression */, props)
+nthLastOfType(/* expression */, props)
+nthOfType(/* expression */, props)
+```
+
+---
+
+`<pseudo>(props)`
+
+where `<pseudo>` is one of
+```
+after  before  firstLetter  firstLine  selection  backdrop  placeholder
+```
+
+similar to the above, but for pseudo elements.
+
+```jsx
+<div {...before({ content: '"hello "' })}>
+  world!
+</div>
+// note the quotes for `content`'s value
+```
+
+---
+
+### select | $
+
+`select(selector, props)` / `$(selector, props)`
+
+an escape hatch to define styles for arbitrary css selectors. your selector is appended 
+directly to the css rule, letting you define 'whatever' you want. 
+
+```jsx
+<div {...$(':hover ul li:nth-child(even)', { color: 'red' })}>
+  <ul>
+    <li>one</li>
+    <li>two - red!</li>
+    <li>three</li>
+  </ul>
+</div>
+```
+
+(nb1: don't forget to add a leading space for 'child' selectors. eg - `$(' .item', {...})`. 
+(nb2: `simulate()` does not work on these selectors yet.)
+
+---
+
+### parent
+
+`parent(selector, style)`
+
+an escape hatch to target elements based on it's parent 
+
+```jsx
+<div {...parent('.no-js', { backgroundColor: '#ccc' })}> 
+  this is gray when js is disabled   
+</div>
+
+TODO - pseudo selectors for the same
+```
+---
+
+### compose | merge
+
+`compose(...rules)` / `merge(...rules)`
+
+combine rules, with latter styles taking precedence over previous ones.
+
+```jsx
+<div {...
+  compose(
+    style(props),
+    hover(props),
+    { color: 'red' },
+    hover(props)) }>
+      mix it up!
+</div>
+```
+
+---
+
+### media
+
+`media(query, ...rules)`
+
+media queries!
+
+```jsx
+<div {...media('(min-width: 500px) and (orientation: landscape)', 
+            { color: 'blue' }, hover({ color: 'red' }))}>
+  resize away
+</div>
+```
+
+also included are some presets 
+
+`presets.mobile` - `(min-width: 400px)`
+`presets.phablet` - `(min-width: 550px)`
+`presets.tablet` - `(min-width: 750px)`
+`presets.desktop` - `(min-width: 1000px)`
+`presets.hd` - `(min-width: 1200px)`
+
+and use as -
+```jsx
+media(presets.tablet, {...})
+```
+
+---
+
+
+## Moving from css to glamor
+
+### Apply a style to an element 
+--- 
+
+css
+```css
+.box { color: red; }
+```
+```html
+<div class='box'> 
+  this is a nice box. 
+<div>
+```
+
+glamor 
+```jsx 
+import { css } from 'glamor'
+
+let box = css({ color: 'red' })
+// ...
+<div {...box}>
+  this is a nice box. 
+</div>
+
+// or 
+<div className={box}>
+  this is a nice box. 
+</div>
+
+
+```
+
+### Pseudoclasses
+---
+
+css
+```css
+.box:hover { color: blue; }
+```
+
+glamor
+```jsx
+import { css } from 'glamor'
+
+let boxHover = css({ 
+  ':hover': {
+    color: 'blue' 
+  } 
+})
+
+// or 
+
+import { hover } from 'glamor'
+let boxHover = hover({ color: 'blue' })
+```
+
+
+### Multiple styles to an element
+---
+
+css
+```html
+<div class="bold myClass"/>
+```
+
+glamor 
+```jsx
+import { css } from 'glamor'
+
+<div {...bold} {...myClass} />
+
+// or, unlike css, to maintain precendence order 
+
+<div {...css(bold, myClass)} />
+
+// also works with classes
+
+<div className={css(bold, myClass)} />
+```
+
+[(more examples for composing rules)](https://github.com/threepointone/glamor/blob/master/src/ous.js)
+
+
+### Child selectors
+---
+
+css
+```css
+#box { display: block; }
+.bold { font-weight: bold; }
+.one  { color: blue; }
+#box:hover .two { color: red; }
+```
+```html
+<div id="box">
+  <div class="one bold">is blue-bold!</div>
+  <div class="two">hover red!</div>
+</div>
+```
+
+glamor 
+```jsx
+import { css } from 'glamor'
+
+let box = css({
+  display: 'block',
+  '& .bold': { fontWeight: 'bold' },
+  '& .one': { color: 'blue' },
+  ':hover .two': { color: 'red' }
+})
+
+// or 
+import { css, select as $ } from 'glamor'
+let box = css(
+  { display: 'block' },
+  $('& .bold', { fontWeight: 'bold' }),
+  $('& .one', { color: 'blue' }),
+  $(':hover .two', { color: 'red' }),  
+)
+
+
+<div {...box}>
+  <div className="one bold">is blue-bold!</div>
+  <div className="two">hover red!</div>
+</div>
+
+```
+
+It's also possible to use Glamor's generated `classNames` for nested styles:
+
+glamor 
+```jsx
+import { css } from 'glamor'
+
+const child = css({
+  // Child styles ...
+});
+const parent = css({
+  // Parent styles ...
+
+  [`& .${child}`]: {
+    // Nested child styles
+  }
+});
+
+
+<div className={parent}>
+  <div className={child}>...</div>
+</div>
+
+```
+
+your components could also accept props to be merged into the component 
+
+```jsx
+let defaultStyle = { color: 'blue' }
+export const Button = ({ css, children, ...props }) => 
+  <button {...props} {merge(defaultStyle, css)}>
+    {children}
+  </button>
+
+<Button css={hover({ color: 'red' })} />
+```
+
+[todo - vars and themes]
+
+### parent selectors 
+---
+
+css
+```css
+.no-js .something #box { color: gray; }
+```
+
+glamor 
+```jsx
+import {css, parent} from 'glamor'
+
+let box = css({
+  '.no-js .something &': { color: 'gray' }
+})
+
+// or 
+
+import { css, parent } from 'glamor'
+
+let box = parent('.no-js .something', 
+  { color: 'gray' })
+
+<div {...box} /> 
+```
+
+
+### Siblings
+---
+
+use `+` and `~` selectors
+
+css
+```css
+.list li:first-of-type + li {
+  color: red
+}
+```
+```html
+<ul class='list'>
+  <li>one</li>
+  <li>two - red!</li>
+  <li>three</li>
+</ul>
+```
+
+glamor
+```jsx
+import {select as $} from 'glamor'
+
+let ul = $('& li:first-of-type + li', {
+  color: 'red'
+})
+
+// ...
+
+<ul {...ul}>
+  <li>one</li>
+  <li>two - red!</li>
+  <li>three</li>  
+</ul>
+```
+
+
+### Media queries
+---
+
+css
+```css
+.box {
+  position: 'relative',
+  width: '100%',
+  maxWidth: 960,
+  margin: '0 auto',
+  padding: '0 20px',
+  boxSizing: 'border-box'
+}
+
+.box:after {
+  content: '""',
+  display: 'table',
+  clear: 'both'
+}
+
+@media (min-width: 400px) {
+  .box {
+    width: 85%;
+    padding: 0
+  }
+}
+
+@media (min-width: 550px) {
+  .box:nth-child(2n) {
+    width: 80%
+  }
+}
+```
+
+glamor
+```jsx
+import {css, after, media, nthChild} from 'glamor'
+
+const container = css(
+  {
+    position: 'relative',
+    width: '100%',
+    maxWidth: 960,
+    margin: '0 auto',
+    padding: '0 20px',
+    boxSizing: 'border-box'
+  },
+  after({
+    content: '""',
+    display: 'table',
+    clear: 'both'
+  }),
+  { 
+    '@media(min-width: 400px)': {
+      width: '85%',
+      padding: 0
+    }
+  },
+  // or use helpers 
+  media('(min-width: 550px)', nthChild('2n', {
+    width: '80%'    
+  }))  
+)
+```
+
+
+### Global css rule
+---
+
+css 
+```css
+html, body { padding: 0 }
+```
+
+glamor 
+```jsx
+import { css } from 'glamor'
+
+css.global('html, body',  { padding: 0 })
+// or as raw css
+css.insert('html, body { padding: 0 }')
+```
+
+### Fallback values
+---
+
+css
+```css
+.box {
+  display: flex;
+  display: block;
+}
+```
+
+glamor 
+```jsx
+let box = style({
+  display: ['flex', 'block']
+})
+```
+
+### Font-face
+---
+
+[todo]
+
+### Animations
+---
+
+css 
+```css
+@keyframes bounce { 
+  0%: { transform: scale(0.1); opacity: 0; }
+  60%: { transform: scale(1.2); opacity: 1; }
+  100%: { transform: scale(1); }
+}
+
+.box {
+  animation: bounce 2s;
+  width: 50px;
+  height: 50px;
+  backgroundColor: 'red';
+}
+```
+
+glamor
+```jsx
+let bounce = css.keyframes({ 
+  '0%': { transform: 'scale(0.1)', opacity: 0 },
+  '60%': { transform: 'scale(1.2)', opacity: 1 },
+  '100%': { transform: 'scale(1)' }
+})
+
+let box = css({
+  animation: `${bounce} 2s`,
+  width: 50,
+  height: 50,
+  backgroundColor: 'red'
+}) 
+```
+
+### css reset / normalize
+---
+
+```jsx
+import `glamor/reset`
+```
+
+### Combined selectors
+---
+
+css
+```css
+.f1 { font-size: 1rem };
+.red { background: red };
+.f1.red { font-size: 2rem };
+```
+```html
+<div class="f1 red">
+  I'm red and 2rem!
+</div>
+```
+
+glamor
+```js
+// With regular selectors (not ideal for namespacing/isolation)
+const rule = style({
+  '&.f1' : { fontSize: '1rem' },
+  '&.red' : { background: 'red' },
+  '&.f1.red' : { fontSize: '2rem' }
+ })
+
+<div class={`${rule} f1 red`}></div>
+
+
+// Or use merge to output a single css selector
+const f1 = ({ fontSize: '1rem' });
+const red = ({ background: 'red' });
+const f1Red = merge(f1, red, { fontSize: '2rem' });
+
+<div class={rule}></div>
+
+
+// Or for a more traditional css approach...
+const f1 = ({ fontSize: '1rem' });
+const red = ({ background: 'red' });
+const f1Red = style({
+  [`&.${f1}.${red}`]: { fontSize: '2rem' }
+});
+
+// ...but you still have to use all three selectors
+<div class={`${f1} ${red} ${f1red}`}></div>
+```
+
 
 ## Aphrodite shim
 --- 
@@ -329,7 +917,8 @@ let sheet = createSheet({
 </div>
 ```
 
-### Conditional styles
+## Conditional styles
+---
 
 All the functions exposed by glamor do cleanup of arguments. False, null, undefined and {} values will be removed.
 
@@ -640,603 +1229,6 @@ eliminating the need for the css parser in the js bundle. wowzah.
 - tests!!!
 - guidance for difference types of 'static' css extraction
 
-## Helpers
----
-
-### style 
-
-`style(props)`
-
-Defines a `rule` with the given key-value pairs. returns an object (of shape `{'data-css-<id>': ''}`),
-to be added to an element's attributes. This is *not* the same as element's `style`,
-and doesn't interfere with the element's `className` / `class`
-
-```jsx
-<div {...style({ backgroundColor: '#ccc', borderRadius: 10 })}>
-  <a {...style({ label: 'blueText', color: 'blue' })} href='github.com'>
-    click me
-  </a>
-</div>
-```
-
----
-
-### <pseudo>
-
-`<pseudo>(props)`
-
-where `<pseudo>` is one of :
-```
-active      any           checked     _default    disabled    empty
-enabled     first         firstChild  firstOfType fullscreen  focus
-hover       indeterminate inRange     invalid     lastChild   lastOfType
-left        link          onlyChild   onlyOfType  optional    outOfRange
-readOnly    readWrite     required    right root  scope       target
-valid       visited
-```
-
-defines a `rule` for the given pseudoclass selector
-
-```jsx
-<div {...hover({ backgroundColor: '#ccc', display: 'block'})}>
-  <input
-    {...style({ color: 'gray', fontSize: 12 })}
-    {...focus({ color: 'black' })}
-    {...hover({ fontSize: 16 })} />
-</div>
-```
-
----
-
-`<pseudo>(param, props)`
-
-where `<pseudo>` is one of :
-```
-dir  lang  not  nthChild  nthLastChild  nthLastOfType  nthOfType
-```
-
-like the above, but parameterized with a number / string
-
-```jsx
-dir('ltr', props), dir('rtl', props)
-lang('en', props), lang('fr', props), lang('hi', props) /* etc... */
-not(/* selector */, props)
-nthChild(2, props), nthChild('3n-1', props), nthChild('even', props) /* etc... */
-nthLastChild(/* expression */, props)
-nthLastOfType(/* expression */, props)
-nthOfType(/* expression */, props)
-```
-
----
-
-`<pseudo>(props)`
-
-where `<pseudo>` is one of
-```
-after  before  firstLetter  firstLine  selection  backdrop  placeholder
-```
-
-similar to the above, but for pseudo elements.
-
-```jsx
-<div {...before({ content: '"hello "' })}>
-  world!
-</div>
-// note the quotes for `content`'s value
-```
-
----
-
-### select / $
-
-`select(selector, props)` / `$(selector, props)`
-
-an escape hatch to define styles for arbitrary css selectors. your selector is appended 
-directly to the css rule, letting you define 'whatever' you want. 
-
-```jsx
-<div {...$(':hover ul li:nth-child(even)', { color: 'red' })}>
-  <ul>
-    <li>one</li>
-    <li>two - red!</li>
-    <li>three</li>
-  </ul>
-</div>
-```
-
-(nb1: don't forget to add a leading space for 'child' selectors. eg - `$(' .item', {...})`. 
-(nb2: `simulate()` does not work on these selectors yet.)
-
----
-
-### parent
-
-`parent(selector, style)`
-
-an escape hatch to target elements based on it's parent 
-
-```jsx
-<div {...parent('.no-js', { backgroundColor: '#ccc' })}> 
-  this is gray when js is disabled   
-</div>
-
-TODO - pseudo selectors for the same
-```
----
-
-### compose / merge
-
-`compose(...rules)` / `merge(...rules)`
-
-combine rules, with latter styles taking precedence over previous ones.
-
-```jsx
-<div {...
-  compose(
-    style(props),
-    hover(props),
-    { color: 'red' },
-    hover(props)) }>
-      mix it up!
-</div>
-```
-
----
-
-### media
-
-`media(query, ...rules)`
-
-media queries!
-
-```jsx
-<div {...media('(min-width: 500px) and (orientation: landscape)', 
-            { color: 'blue' }, hover({ color: 'red' }))}>
-  resize away
-</div>
-```
-
-also included are some presets 
-
-`presets.mobile` - `(min-width: 400px)`
-`presets.phablet` - `(min-width: 550px)`
-`presets.tablet` - `(min-width: 750px)`
-`presets.desktop` - `(min-width: 1000px)`
-`presets.hd` - `(min-width: 1200px)`
-
-and use as -
-```jsx
-media(presets.tablet, {...})
-```
-
----
-
-
-## Moving from css to glamor
-
-### Apply a style to an element 
---- 
-
-css
-```css
-.box { color: red; }
-```
-```html
-<div class='box'> 
-  this is a nice box. 
-<div>
-```
-
-glamor 
-```jsx 
-import { css } from 'glamor'
-
-let box = css({ color: 'red' })
-// ...
-<div {...box}>
-  this is a nice box. 
-</div>
-
-// or 
-<div className={box}>
-  this is a nice box. 
-</div>
-
-
-```
-
-### Pseudoclasses
----
-
-css
-```css
-.box:hover { color: blue; }
-```
-
-glamor
-```jsx
-import { css } from 'glamor'
-
-let boxHover = css({ 
-  ':hover': {
-    color: 'blue' 
-  } 
-})
-
-// or 
-
-import { hover } from 'glamor'
-let boxHover = hover({ color: 'blue' })
-```
-
-
-### Multiple styles to an element
----
-
-css
-```html
-<div class="bold myClass"/>
-```
-
-glamor 
-```jsx
-import { css } from 'glamor'
-
-<div {...bold} {...myClass} />
-
-// or, unlike css, to maintain precendence order 
-
-<div {...css(bold, myClass)} />
-
-// also works with classes
-
-<div className={css(bold, myClass)} />
-```
-
-[(more examples for composing rules)](https://github.com/threepointone/glamor/blob/master/src/ous.js)
-
-
-### Child selectors
----
-
-css
-```css
-#box { display: block; }
-.bold { font-weight: bold; }
-.one  { color: blue; }
-#box:hover .two { color: red; }
-```
-```html
-<div id="box">
-  <div class="one bold">is blue-bold!</div>
-  <div class="two">hover red!</div>
-</div>
-```
-
-glamor 
-```jsx
-import { css } from 'glamor'
-
-let box = css({
-  display: 'block',
-  '& .bold': { fontWeight: 'bold' },
-  '& .one': { color: 'blue' },
-  ':hover .two': { color: 'red' }
-})
-
-// or 
-import { css, select as $ } from 'glamor'
-let box = css(
-  { display: 'block' },
-  $('& .bold', { fontWeight: 'bold' }),
-  $('& .one', { color: 'blue' }),
-  $(':hover .two', { color: 'red' }),  
-)
-
-
-<div {...box}>
-  <div className="one bold">is blue-bold!</div>
-  <div className="two">hover red!</div>
-</div>
-
-```
-
-It's also possible to use Glamor's generated `classNames` for nested styles:
-
-glamor 
-```jsx
-import { css } from 'glamor'
-
-const child = css({
-  // Child styles ...
-});
-const parent = css({
-  // Parent styles ...
-
-  [`& .${child}`]: {
-    // Nested child styles
-  }
-});
-
-
-<div className={parent}>
-  <div className={child}>...</div>
-</div>
-
-```
-
-your components could also accept props to be merged into the component 
-
-```jsx
-let defaultStyle = { color: 'blue' }
-export const Button = ({ css, children, ...props }) => 
-  <button {...props} {merge(defaultStyle, css)}>
-    {children}
-  </button>
-
-<Button css={hover({ color: 'red' })} />
-```
-
-[todo - vars and themes]
-
-parent selectors 
----
-
-css
-```css
-.no-js .something #box { color: gray; }
-```
-
-glamor 
-```jsx
-import {css, parent} from 'glamor'
-
-let box = css({
-  '.no-js .something &': { color: 'gray' }
-})
-
-// or 
-
-import { css, parent } from 'glamor'
-
-let box = parent('.no-js .something', 
-  { color: 'gray' })
-
-<div {...box} /> 
-```
-
-
-### Siblings
----
-
-use `+` and `~` selectors
-
-css
-```css
-.list li:first-of-type + li {
-  color: red
-}
-```
-```html
-<ul class='list'>
-  <li>one</li>
-  <li>two - red!</li>
-  <li>three</li>
-</ul>
-```
-
-glamor
-```jsx
-import {select as $} from 'glamor'
-
-let ul = $('& li:first-of-type + li', {
-  color: 'red'
-})
-
-// ...
-
-<ul {...ul}>
-  <li>one</li>
-  <li>two - red!</li>
-  <li>three</li>  
-</ul>
-```
-
-
-### Media queries
----
-
-css
-```css
-.box {
-  position: 'relative',
-  width: '100%',
-  maxWidth: 960,
-  margin: '0 auto',
-  padding: '0 20px',
-  boxSizing: 'border-box'
-}
-
-.box:after {
-  content: '""',
-  display: 'table',
-  clear: 'both'
-}
-
-@media (min-width: 400px) {
-  .box {
-    width: 85%;
-    padding: 0
-  }
-}
-
-@media (min-width: 550px) {
-  .box:nth-child(2n) {
-    width: 80%
-  }
-}
-```
-
-glamor
-```jsx
-import {css, after, media, nthChild} from 'glamor'
-
-const container = css(
-  {
-    position: 'relative',
-    width: '100%',
-    maxWidth: 960,
-    margin: '0 auto',
-    padding: '0 20px',
-    boxSizing: 'border-box'
-  },
-  after({
-    content: '""',
-    display: 'table',
-    clear: 'both'
-  }),
-  { 
-    '@media(min-width: 400px)': {
-      width: '85%',
-      padding: 0
-    }
-  },
-  // or use helpers 
-  media('(min-width: 550px)', nthChild('2n', {
-    width: '80%'    
-  }))  
-)
-```
-
-
-### Global css rule
----
-
-css 
-```css
-html, body { padding: 0 }
-```
-
-glamor 
-```jsx
-import { css } from 'glamor'
-
-css.global('html, body',  { padding: 0 })
-// or as raw css
-css.insert('html, body { padding: 0 }')
-```
-
-### Fallback values
----
-
-css
-```css
-.box {
-  display: flex;
-  display: block;
-}
-```
-
-glamor 
-```jsx
-let box = style({
-  display: ['flex', 'block']
-})
-```
-
-
-### Font-face
----
-
-[todo]
-
-### Animations
----
-
-css 
-```css
-@keyframes bounce { 
-  0%: { transform: scale(0.1); opacity: 0; }
-  60%: { transform: scale(1.2); opacity: 1; }
-  100%: { transform: scale(1); }
-}
-
-.box {
-  animation: bounce 2s;
-  width: 50px;
-  height: 50px;
-  backgroundColor: 'red';
-}
-```
-
-glamor
-```jsx
-let bounce = css.keyframes({ 
-  '0%': { transform: 'scale(0.1)', opacity: 0 },
-  '60%': { transform: 'scale(1.2)', opacity: 1 },
-  '100%': { transform: 'scale(1)' }
-})
-
-let box = css({
-  animation: `${bounce} 2s`,
-  width: 50,
-  height: 50,
-  backgroundColor: 'red'
-}) 
-```
-
-### css reset / normalize
----
-
-```jsx
-import `glamor/reset`
-```
-
-### Combined selectors
----
-
-css
-```css
-.f1 { font-size: 1rem };
-.red { background: red };
-.f1.red { font-size: 2rem };
-```
-```html
-<div class="f1 red">
-  I'm red and 2rem!
-</div>
-```
-
-glamor
-```js
-// With regular selectors (not ideal for namespacing/isolation)
-const rule = style({
-  '&.f1' : { fontSize: '1rem' },
-  '&.red' : { background: 'red' },
-  '&.f1.red' : { fontSize: '2rem' }
- })
-
-<div class={`${rule} f1 red`}></div>
-
-
-// Or use merge to output a single css selector
-const f1 = ({ fontSize: '1rem' });
-const red = ({ background: 'red' });
-const f1Red = merge(f1, red, { fontSize: '2rem' });
-
-<div class={rule}></div>
-
-
-// Or for a more traditional css approach...
-const f1 = ({ fontSize: '1rem' });
-const red = ({ background: 'red' });
-const f1Red = style({
-  [`&.${f1}.${red}`]: { fontSize: '2rem' }
-});
-
-// ...but you still have to use all three selectors
-<div class={`${f1} ${red} ${f1red}`}></div>
-```
 
 
 ## What happens when I call css(...rules)?
